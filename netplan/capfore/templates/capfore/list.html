@@ -1,0 +1,201 @@
+{% extends "capfore/base.html" %}
+
+
+{% block list_status %}active{% endblock %}
+{% block list_url %}#{% endblock %}
+
+{% block content %}
+
+<div class="table-responsive">
+    <div id="toolbar">
+        <button id="remove" class="btn btn-danger" disabled>
+            <i class="glyphicon glyphicon-remove"></i> Delete
+        </button>
+    </div>
+
+    <table id="table"
+           data-toolbar="#toolbar"
+           data-fixed-columns="false"
+           data-search="true"
+           data-show-refresh="true"
+           data-show-toggle="true"
+           data-show-columns="false"
+           data-show-export="false"
+           data-icon-size="undefined"
+           data-detail-formatter="detailFormatter"
+           data-minimum-count-columns="2"
+           data-show-pagination-switch="true"
+           data-pagination="true"
+           data-id-field="id"
+           data-page-list="[10, 25, 50, 100, ALL]"
+           data-show-footer="false"
+           data-side-pagination="server"
+           data-url="{% url 'task-list' %}"
+           >
+    </table>
+</div>
+
+<script type="text/javascript">
+    var csrftoken = Cookies.get('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    };
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    function deleteTask(taskid){
+        if (true || confirm('删除任务：'+taskid) ) {
+            $.ajax({
+                url:'{% url 'task-list' %}'+taskid+'/',
+                type:'DELETE',
+                async:false ,
+                error:function(result) {
+                    // Do something with the result
+
+                },
+                success: function(result) {
+                    // Do something with the result
+
+                }
+            });
+        }
+    };
+
+    $("#table").bootstrapTable({
+        height:"620",
+        columns: [
+            {
+                field: 'state',
+                checkbox: true,
+                align: 'center',
+                valign: 'middle'
+            },
+            {field: 'id', title: 'id', align: 'center'},
+            {field: 'name', title: '任务名称', align: 'center'},
+            {field: 'created', title: '创建时间', align: 'center',formatter:dateFormatter},
+            {field: 'curdate', title: '现网时间（月）', align: 'center',formatter:dateFormatter},
+            {field: 'period', title: '预测周期（月）', align: 'center'},
+            {field: 'progress', title: '当前进度', align: 'center',formatter:percentFormatter},
+            {field: 'status', title: '状态', align: 'center'},
+            {
+                field: 'operate',
+                title: '任务操作',
+                align: 'center',
+                events: {
+                    'click .detail': function (e, value, row, index) {
+                                        window.location.href= '{% url 'capfore_taskdetail' '999' %}'.replace('999',row.id)
+                                    },
+                    'click .remove': function (e, value, row, index) {
+                                        $('#table').bootstrapTable('remove', {
+                                            field: 'id',
+                                            values: [row.id]
+                                        });
+                                        deleteTask(row.id);
+                                     }
+                },
+                formatter: operateFormatter
+            }
+            ],
+
+        queryParams: function (params) {
+            return {
+                    limit: params.limit, //页面大小
+                    offset: params.offset, //页码
+                    pager:'cusor'
+                };
+        },
+        responseHandler:function (res) {
+            return {
+                rows: res.results,
+                total:res.count
+            };
+        }
+    });
+
+    //$('#table').on('click-row.bs.table', function (e, row, $element, field) {
+    //    window.location.href= '{% url 'capfore_taskdetail' '999' %}'.replace('999',row.id)
+    //});
+
+    $('#table').on('check.bs.table uncheck.bs.table ' +
+                'check-all.bs.table uncheck-all.bs.table', function () {
+           $("#remove").prop('disabled', !$('#table').bootstrapTable('getSelections').length);
+
+            // save your data, here just save the current page
+            selections = getIdSelections();
+            // push or splice the selections if you want to save all data selections
+        });
+
+    function getIdSelections() {
+        return $.map($('#table').bootstrapTable('getSelections'), function (row) {
+            return row.id
+        });
+    }
+
+
+    function detailFormatter(index, row) {
+        var html = [];
+        $.each(row, function (key, value) {
+            html.push('<p><b>' + key + ':</b> ' + value + '</p>');
+        });
+        return html.join('');
+    }
+
+    $("#remove").click(function () {
+            var ids = getIdSelections();
+            $('#table').bootstrapTable('remove', {
+                field: 'id',
+                values: ids
+            });
+            for(i = 0 ; i<ids.length; i++){
+                deleteTask(ids[i]);
+            };
+            $("#remove").prop('disabled', true);
+        });
+
+    function operateFormatter(value, row, index) {
+        return [
+            '<a class="detail" href="javascript:void(0)" title="Detail">',
+            '<i class="glyphicon glyphicon-info-sign"></i>',
+            '</a>  ',
+            '<a class="remove" href="javascript:void(0)" title="Remove">',
+            '<i class="glyphicon glyphicon-remove"></i>',
+            '</a>'
+        ].join('');
+    };
+
+    function percentFormatter(value,row,index) {
+        return (value*100).toFixed(2)+'%';
+    }
+
+    Date.prototype.Format = function (fmt) { //author: meizz
+    var o = {
+        "M+": this.getMonth() + 1, //月份
+        "d+": this.getDate(), //日
+        "h+": this.getHours(), //小时
+        "m+": this.getMinutes(), //分
+        "s+": this.getSeconds(), //秒
+        "q+": Math.floor((this.getMonth() + 3) / 3), //季度
+        "S": this.getMilliseconds() //毫秒
+    };
+    if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+    for (var k in o)
+    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+    return fmt;
+}
+
+    function dateFormatter(value,row,index) {
+        return value.substring(0,19);
+    }
+
+
+ </script>
+
+{% endblock %}

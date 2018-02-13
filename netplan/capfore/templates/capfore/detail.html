@@ -1,0 +1,102 @@
+{% extends "capfore/base.html" %}
+
+
+{% block detail_status %}active{% endblock %}
+{% block detail_url %}#{% endblock %}
+
+{% block content %}
+
+<div class="table-responsive">
+    <div id="toolbar">
+        <a id="download" class="btn btn-primary"  data-loading-text="提交中...">
+            <i class="glyphicon glyphicon-download-alt"></i> Download
+        </a>
+    </div>
+    <table class="table table-striped " id="table"
+           data-fixed-columns="true"
+           data-show-export="true"
+           data-toolbar="#toolbar"
+           data-page-list="[10, 25, 50, 100, ALL]"
+           data-show-footer="false"
+           data-side-pagination="server"
+           >
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("#table").bootstrapTable({
+            url: '{% url 'task-cells' taskid %}?format=json',
+            dataType: "json",
+            height:"620",
+            pagination: true, //分页
+            singleSelect: false,
+            search: false, //显示搜索框
+            pageSize:50,
+            pageList:[50],
+            sidePagination: "server", //服务端处理分页
+            columns: [
+                {field: 'cgi' , title: 'cgi' , align:'center',class:'text-nowrap'},
+                {field: 'name' , title: 'name' , align:'center',class:'text-nowrap'},
+                {field: 'task_id' , title: 'task_id' , align:'center'},
+                <!--{field: 'scene1' , title: 'scene1' , align:'center',class:'text-nowrap'},-->
+                <!--{field: 'scene2' , title: 'scene2' , align:'center',class:'text-nowrap'},-->
+                <!--{field: 'scene3' , title: 'scene3' , align:'center',class:'text-nowrap'},-->
+                {field: 'band' , title: 'band' , align:'center',class:'text-nowrap'},
+                {field: 'city' , title: 'city' , align:'center', class:'text-nowrap'},
+                {field: 'erab_nbrmeanestab' , title: 'erab_nbrmeanestab' , align:'center',formatter: floatFormatter},
+                {field: 'erab_nbrsuccestab' , title: 'erab_nbrsuccestab' , align:'center',formatter: floatFormatter},
+                {field: 'erab_upoctdl' , title: 'erab_upoctdl' , align:'center',formatter: floatFormatter},
+                {field: 'f' , title: 'f' , align:'center',formatter: floatFormatter},
+                {field: 'indoor' , title: 'indoor' , align:'center',class:'text-nowrap'},
+                {field: 'lat' , title: 'lat' , align:'center'},
+                {field: '"long"' , title: '"long"' , align:'center'},
+                {field: 'packagetype' , title: 'packagetype' , align:'center'},
+                {field: 'pdcp_upoctdl' , title: 'pdcp_upoctdl' , align:'center',formatter: floatFormatter},
+                {field: 'pdcp_upoctdl_e' , title: 'pdcp_upoctdl_e' , align:'center',formatter: floatFormatter},
+                {field: 'pdcp_upoctdl_predict' , title: 'pdcp_upoctdl_predict' , align:'center',formatter: floatFormatter},
+                {field: 'pdcp_upoctul' , title: 'pdcp_upoctul' , align:'center',formatter: floatFormatter},
+                {field: 'pdcp_upoctul_e' , title: 'pdcp_upoctul_e' , align:'center',formatter: floatFormatter},
+                {field: 'pdcp_upoctul_predict' , title: 'pdcp_upoctul_predict' , align:'center',formatter: floatFormatter},
+                {field: 'prb_dlutilization' , title: 'prb_dlutilization' , align:'center',formatter: floatFormatter},
+                {field: 'prb_dlutilization_e' , title: 'prb_dlutilization_e' , align:'center',formatter: floatFormatter},
+                {field: 'prb_dlutilization_predict' , title: 'prb_dlutilization_predict' , align:'center',formatter: floatFormatter},
+                {field: 'prb_ulutilization' , title: 'prb_ulutilization' , align:'center',formatter: floatFormatter},
+                {field: 'prb_ulutilization_e' , title: 'prb_ulutilization_e' , align:'center',formatter: floatFormatter},
+                {field: 'prb_ulutilization_predict' , title: 'prb_ulutilization_predict' , align:'center',formatter: floatFormatter},
+                {field: 'rrc_connmean' , title: 'rrc_connmean' , align:'center',formatter: floatFormatter},
+                {field: 'rrc_connmean_e' , title: 'rrc_connmean_e' , align:'center',formatter: floatFormatter},
+                {field: 'rrc_connmean_predict' , title: 'rrc_connmean_predict' , align:'center',formatter: floatFormatter},
+                {field: 'rrc_effectiveconnmean' , title: 'rrc_effectiveconnmean' , align:'center',formatter: floatFormatter},
+                {field: 'rrc_effectiveconnmean_e' , title: 'rrc_effectiveconnmean_e' , align:'center',formatter: floatFormatter},
+                {field: 'rrc_effectiveconnmean_predict' , title: 'rrc_effectiveconnmean_predict' , align:'center',formatter: floatFormatter},
+                {field: 'isneededexpansion' , title: 'isneededexpansion' , align:'center'},
+                ],
+            queryParams: function (params) {
+                return {
+                        limit: params.limit, //页面大小
+                        offset: params.offset, //页码
+                        pager:'cusor'
+                    };
+            },
+            responseHandler:function (res) {
+                return {
+                    rows: res.results,
+                    total:res.count
+                };
+            }
+        });
+    });
+
+    function percentFormatter(value,row,index) {
+        return (value*100).toFixed(2)+'%';
+    }
+
+    function floatFormatter(value,row,index) {
+        return value.toFixed(2);
+    }
+
+
+ </script>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "capfore/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block new_status %}active{% endblock %}
+{% block new_url %}#{% endblock %}
+
+{% block content %}
+{% crispy newform %}
+<script>
+
+$('.datepicker').datepicker({
+    format: 'yyyy-mm-dd',
+});
+</script>
+{% endblock %}

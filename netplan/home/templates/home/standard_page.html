@@ -1,0 +1,28 @@
+{% extends "home/base.html" %}
+{% load wagtailcore_tags %}
+
+{% block heading %}{% endblock %}
+
+{% block container_class %}main content {% endblock %}
+
+{% block content %}
+    <iframe id = 'external-frame' width="100%" class = "main" scrolling = "no" src="{{ self.frameurl  }}"></iframe>
+{% endblock %}
+
+{% block extra_js %}
+{#  frame 高度自适应调整 #}
+<script>
+    function setIframeHeight(iframe) {
+    if (iframe) {
+        var iframeWin = iframe.contentWindow || iframe.contentDocument.parentWindow;
+        if (iframeWin.document.body) {
+            iframe.height = iframeWin.document.documentElement.scrollHeight || iframeWin.document.body.scrollHeight;
+        }
+    }
+    };
+
+    window["external-frame"].onload = function () {
+    setIframeHeight(this);
+    };
+</script>
+{% endblock %}
