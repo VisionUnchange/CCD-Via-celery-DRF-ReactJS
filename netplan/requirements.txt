@@ -23,7 +23,7 @@ kombu==4.1.0
 libsass==0.13.2
 numpy==1.13.1
 olefile==0.44
-Pillow==4.2.1
+Pillow==9.0.1
 pip==9.0.1
 psycopg2==2.7.3
 pytz==2017.2
